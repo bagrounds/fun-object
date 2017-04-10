@@ -12,6 +12,7 @@
   module.exports = {
     keys: keys,
     values: values,
+    reKey: curry(reKey),
     of: curry(of),
     empty: empty,
     concat: curry(concat),
@@ -23,6 +24,19 @@
     set: curry(set),
     filterKeys: curry(filterKeys),
     filter: curry(filter)
+  }
+
+  /**
+   *
+   * @function module:fun-object.reKey
+   *
+   * @param {Object} keyMap - object of { oldKey: newKey, ... }
+   * @param {Object} source - to reKey
+   *
+   * @return {Object} with values at new keys
+   */
+  function reKey (keyMap, source) {
+    return apKeys(map(K, keyMap), source)
   }
 
   /**
@@ -242,6 +256,12 @@
 
   function id (x) {
     return x
+  }
+
+  function K (x) {
+    return function K () {
+      return x
+    }
   }
 })()
 
