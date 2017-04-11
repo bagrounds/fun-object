@@ -10,6 +10,8 @@
 
   /* exports */
   module.exports = {
+    keep: curry(keep),
+    drop: curry(drop),
     keys: keys,
     values: values,
     reKey: curry(reKey),
@@ -24,6 +26,36 @@
     set: curry(set),
     filterKeys: curry(filterKeys),
     filter: curry(filter)
+  }
+
+  /**
+   *
+   * @function module:fun-object.drop
+   *
+   * @param {Array<String>} keys - to drop
+   * @param {Object} source - to drop keys from
+   *
+   * @return {Object} without keys specified
+   */
+  function drop (keys, source) {
+    return filterKeys(function (key) {
+      return keys.indexOf(key) === -1
+    }, source)
+  }
+
+  /**
+   *
+   * @function module:fun-object.keep
+   *
+   * @param {Array<String>} keys - to keep
+   * @param {Object} source - to keep keys from
+   *
+   * @return {Object} containing only keys specified
+   */
+  function keep (keys, source) {
+    return filterKeys(function (key) {
+      return keys.indexOf(key) !== -1
+    }, source)
   }
 
   /**
