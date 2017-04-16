@@ -25,7 +25,24 @@
     get: curry(get),
     set: curry(set),
     filterKeys: curry(filterKeys),
-    filter: curry(filter)
+    filter: curry(filter),
+    transition: curry(transition)
+  }
+
+  /**
+   *
+   * @function module:fun-object.transition
+   *
+   * @param {Object} options - for transitioning
+   * @param {[String]} options.inputs - keys from source to use as inputs to f
+   * @param {Function} options.f - function to accept inputs
+   * @param {String} options.output - what key to set the result of f to
+   * @param {Object} source - object to get inputs from and put output in
+   *
+   * @return {Object} source object with output key set to result of f({inputs})
+   */
+  function transition (options, source) {
+    return set(options.output, options.f(keep(options.inputs, source)), source)
   }
 
   /**
