@@ -26,7 +26,26 @@
     set: curry(set),
     filterKeys: curry(filterKeys),
     filter: curry(filter),
-    transition: curry(transition)
+    transition: curry(transition),
+    zipWith: curry(zipWith)
+  }
+
+  /**
+   *
+   * @function module:fun-object.zipWith
+   *
+   * @param {Function} f - to apply to each pair of elements from o1 and o2
+   * @param {Object} o1 - first arguments to f
+   * @param {Object} o2 - second arguments to f
+   *
+   * @return {Object} {k1: f(o1[k1], o2[k1]), k2: f(o1[k2], o2[k2]), ...}
+   */
+  function zipWith (f, o1, o2) {
+    return keys(o1).reduce(function (result, key) {
+      result[key] = f(o1[key], o2[key])
+
+      return result
+    }, {})
   }
 
   /**
