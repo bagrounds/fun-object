@@ -34,7 +34,7 @@
    * @function module:fun-object.transition
    *
    * @param {Object} options - for transitioning
-   * @param {Array<String>} options.inputs - keys from source to use as inputs to f
+   * @param {Array<String>} options.inputs - keys from source to use as inputs
    * @param {Function} options.f - function to accept inputs
    * @param {String} options.output - what key to set the result of f to
    * @param {Object} source - object to get inputs from and put output in
