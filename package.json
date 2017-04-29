@@ -1,6 +1,6 @@
 {
   "name": "fun-object",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Functions for working with objects functionally",
   "main": "src/index.js",
   "scripts": {
