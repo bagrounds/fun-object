@@ -12,7 +12,7 @@ Functions for working with objects functionally
 
 ## [Test Coverage](https://bagrounds.gitlab.io/fun-object/coverage/lcov-report/index.html)
 
-## [API Docs](https://bagrounds.gitlab.io/fun-scalar/index.html)
+## [API Docs](https://bagrounds.gitlab.io/fun-object/index.html)
 
 ## Dependencies
 
