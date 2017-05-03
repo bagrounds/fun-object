@@ -153,7 +153,7 @@
    * @param {Object} functions - to apply
    * @param {Object} source - to get values from
    *
-   * @return {Object} of newly keyd values
+   * @return {Object} of newly keyed values
    */
   function apKeys (functions, source) {
     return Object.keys(functions)
