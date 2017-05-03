@@ -185,7 +185,7 @@
 
   /**
    *
-   * @function module:fun-object.mapKeys
+   * @function module:fun-object.map
    *
    * @param {Function} f - * -> *
    * @param {Object} source - to get value from
