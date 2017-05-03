@@ -36,6 +36,6 @@
     "tap": "^10.3.1"
   },
   "dependencies": {
-    "fun-curry": "^0.2.6"
+    "fun-function": "^0.5.0"
   }
 }

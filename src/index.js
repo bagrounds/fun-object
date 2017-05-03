@@ -6,29 +6,31 @@
   'use strict'
 
   /* imports */
-  var curry = require('fun-curry')
+  var fn = require('fun-function')
 
   /* exports */
   module.exports = {
-    keep: curry(keep),
-    drop: curry(drop),
+    keep: fn.curry(keep),
+    drop: fn.curry(drop),
     keys: keys,
     values: values,
-    reKey: curry(reKey),
-    of: curry(of),
+    reKey: fn.curry(reKey),
+    of: fn.curry(of),
     ofPairs: ofPairs,
     empty: empty,
-    concat: curry(concat),
-    map: curry(map),
-    mapKeys: curry(mapKeys),
-    ap: curry(ap),
-    apKeys: curry(apKeys),
-    get: curry(get),
-    set: curry(set),
-    filterKeys: curry(filterKeys),
-    filter: curry(filter),
-    transition: curry(transition),
-    zipWith: curry(zipWith)
+    concat: fn.curry(concat),
+    defaults: fn.curry(defaults),
+    merge: fn.curry(merge),
+    map: fn.curry(map),
+    mapKeys: fn.curry(mapKeys),
+    ap: fn.curry(ap),
+    apKeys: fn.curry(apKeys),
+    get: fn.curry(get),
+    set: fn.curry(set),
+    filterKeys: fn.curry(filterKeys),
+    filter: fn.curry(filter),
+    transition: fn.curry(transition),
+    zipWith: fn.curry(zipWith)
   }
 
   /**
@@ -249,6 +251,40 @@
 
         return result
       }, {})
+  }
+
+  /**
+   *
+   * @function module:fun-object.defaults
+   *
+   * @param {Object} o1 - first object
+   * @param {Object} o2 - second object
+   *
+   * @return {Object} a new object with all keys from o1 and o2, prefering o2
+   */
+  function defaults (o1, o2) {
+    return concat(preferSecond, o1, o2)
+
+    function preferSecond (a, b) {
+      return b !== undefined ? b : a
+    }
+  }
+
+  /**
+   *
+   * @function module:fun-object.merge
+   *
+   * @param {Object} o1 - first object
+   * @param {Object} o2 - second object
+   *
+   * @return {Object} a new object with all keys from o1 and o2, prefering o1
+   */
+  function merge (o1, o2) {
+    return concat(preferFirst, o1, o2)
+
+    function preferFirst (a, b) {
+      return a !== undefined ? a : b
+    }
   }
 
   /**
