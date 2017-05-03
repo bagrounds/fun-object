@@ -16,6 +16,7 @@
     values: values,
     reKey: curry(reKey),
     of: curry(of),
+    ofPairs: ofPairs,
     empty: empty,
     concat: curry(concat),
     map: curry(map),
@@ -278,6 +279,22 @@
    */
   function empty () {
     return {}
+  }
+
+  /**
+   *
+   * @function module:fun-object.ofPairs
+   *
+   * @param {Array<Array>} pairs - [[k1, v1], [k2, v2], ...]
+   *
+   * @return {Object} { k1: v1, k2: v2, ... }
+   */
+  function ofPairs (pairs) {
+    return pairs.reduce(function (result, pair) {
+      result[pair[0]] = pair[1]
+
+      return result
+    }, {})
   }
 
   /**
