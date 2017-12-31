@@ -1,6 +1,6 @@
 {
   "name": "fun-object",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Functions for working with objects functionally",
   "main": "src/index.js",
   "browser": "dist/bundle.js",
