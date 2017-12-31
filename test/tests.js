@@ -18,8 +18,8 @@
     return a !== undefined && b !== undefined
       ? a + b
       : a !== undefined
-      ? a
-      : b
+        ? a
+        : b
   }
 
   var equalityTests = [
@@ -41,6 +41,7 @@
     [[scalar.sum(3), { a: 1, b: 2 }], { a: 4, b: 5 }, 'map'],
     [[predicate.equal('a'), { a: 1, b: 2 }], { a: 1 }, 'filterKeys'],
     [[scalar.lt(3), { a: 1, b: 2, c: 3 }], { a: 1, b: 2 }, 'filter'],
+    [['a', scalar.sum(1), { a: 1, b: 1 }], { a: 2, b: 1 }, 'update'],
     [['b', 2, { a: 1 }], { a: 1, b: 2 }, 'set'],
     [['a', { a: 1 }], 1, 'get'],
     [[], {}, 'empty'],

@@ -6,31 +6,32 @@
   'use strict'
 
   /* imports */
-  var fn = require('fun-function')
+  var curry = require('fun-curry')
 
   /* exports */
   module.exports = {
-    keep: fn.curry(keep),
-    drop: fn.curry(drop),
+    keep: curry(keep),
+    drop: curry(drop),
     keys: keys,
     values: values,
-    reKey: fn.curry(reKey),
-    of: fn.curry(of),
+    reKey: curry(reKey),
+    of: curry(of),
     ofPairs: ofPairs,
     empty: empty,
-    concat: fn.curry(concat),
-    defaults: fn.curry(defaults),
-    merge: fn.curry(merge),
-    map: fn.curry(map),
-    mapKeys: fn.curry(mapKeys),
-    ap: fn.curry(ap),
-    apKeys: fn.curry(apKeys),
-    get: fn.curry(get),
-    set: fn.curry(set),
-    filterKeys: fn.curry(filterKeys),
-    filter: fn.curry(filter),
-    transition: fn.curry(transition),
-    zipWith: fn.curry(zipWith)
+    concat: curry(concat),
+    defaults: curry(defaults),
+    merge: curry(merge),
+    map: curry(map),
+    mapKeys: curry(mapKeys),
+    ap: curry(ap),
+    apKeys: curry(apKeys),
+    get: curry(get),
+    set: curry(set),
+    update: curry(update),
+    filterKeys: curry(filterKeys),
+    filter: curry(filter),
+    transition: curry(transition),
+    zipWith: curry(zipWith)
   }
 
   /**
@@ -248,6 +249,26 @@
       .concat([key])
       .reduce(function (result, k) {
         result[k] = k === key ? value : source[k]
+
+        return result
+      }, {})
+  }
+
+  /**
+   *
+   * @function module:fun-object.update
+   *
+   * @param {String} key - indexing value
+   * @param {Function} f - a -> b
+   * @param {Object} source - to set value on
+   *
+   * @return {Object} copy of source object with source[key] = f(source[key])
+   */
+  function update (key, f, source) {
+    return Object.keys(source)
+      .concat([key])
+      .reduce(function (result, k) {
+        result[k] = k === key ? f(source[k]) : source[k]
 
         return result
       }, {})
