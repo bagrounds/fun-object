@@ -2,37 +2,17 @@
  *
  * @module fun-object
  */
-;(function () {
+;(() => {
   'use strict'
 
   /* imports */
-  var curry = require('fun-curry')
+  const curry = require('fun-curry')
+  const { inputs } = require('guarded')
+  const { any, tuple, arrayOf, objectOf, fun, string, object, record } =
+    require('fun-type')
 
-  /* exports */
-  module.exports = {
-    keep: curry(keep),
-    drop: curry(drop),
-    keys: keys,
-    values: values,
-    reKey: curry(reKey),
-    of: curry(of),
-    ofPairs: ofPairs,
-    empty: empty,
-    concat: curry(concat),
-    defaults: curry(defaults),
-    merge: curry(merge),
-    map: curry(map),
-    mapKeys: curry(mapKeys),
-    ap: curry(ap),
-    apKeys: curry(apKeys),
-    get: curry(get),
-    set: curry(set),
-    update: curry(update),
-    filterKeys: curry(filterKeys),
-    filter: curry(filter),
-    transition: curry(transition),
-    zipWith: curry(zipWith)
-  }
+  const id = x => x
+  const k = x => () => x
 
   /**
    *
@@ -44,13 +24,8 @@
    *
    * @return {Object} {k1: f(o1[k1], o2[k1]), k2: f(o1[k2], o2[k2]), ...}
    */
-  function zipWith (f, o1, o2) {
-    return keys(o1).reduce(function (result, key) {
-      result[key] = f(o1[key], o2[key])
-
-      return result
-    }, {})
-  }
+  const zipWith = (f, o1, o2) =>
+    keys(o1).reduce((r, k) => set(k, f(get(k, o1), get(k, o2)), r), {})
 
   /**
    *
@@ -60,179 +35,127 @@
    * @param {Array<String>} options.inputs - keys from source to use as inputs
    * @param {Function} options.f - function to accept inputs
    * @param {String} options.output - what key to set the result of f to
-   * @param {Object} source - object to get inputs from and put output in
+   * @param {Object} o - source object to get inputs from and put output in
    *
    * @return {Object} source object with output key set to result of f({inputs})
    */
-  function transition (options, source) {
-    return set(options.output, options.f(keep(options.inputs, source)), source)
-  }
+  const transition = ({ output, f, inputs }, o) =>
+    set(output, f(keep(inputs, o)), o)
 
   /**
    *
    * @function module:fun-object.drop
    *
    * @param {Array<String>} keys - to drop
-   * @param {Object} source - to drop keys from
+   * @param {Object} o - object to drop keys from
    *
    * @return {Object} without keys specified
    */
-  function drop (keys, source) {
-    return filterKeys(function (key) {
-      return keys.indexOf(key) === -1
-    }, source)
-  }
+  const drop = (keys, o) => filterKeys(k => keys.indexOf(k) === -1, o)
 
   /**
    *
    * @function module:fun-object.keep
    *
    * @param {Array<String>} keys - to keep
-   * @param {Object} source - to keep keys from
+   * @param {Object} o - object to keep keys from
    *
    * @return {Object} containing only keys specified
    */
-  function keep (keys, source) {
-    return filterKeys(function (key) {
-      return keys.indexOf(key) !== -1
-    }, source)
-  }
+  const keep = (keys, o) => filterKeys(k => keys.indexOf(k) !== -1, o)
 
   /**
    *
    * @function module:fun-object.reKey
    *
    * @param {Object} keyMap - object of { oldKey: newKey, ... }
-   * @param {Object} source - to reKey
+   * @param {Object} o - object to reKey
    *
    * @return {Object} with values at new keys
    */
-  function reKey (keyMap, source) {
-    return apKeys(map(K, keyMap), source)
-  }
+  const reKey = (keyMap, o) => apKeys(map(k, keyMap), o)
 
   /**
    *
    * @function module:fun-object.filter
    *
-   * @param {Function} predicate - to determine value membership
-   * @param {Object} source - to get values from
+   * @param {Function} p - x -> bool
+   * @param {Object} o - object to get values from
    *
    * @return {Object} of values that passed predicate
    */
-  function filter (predicate, source) {
-    return Object.keys(source).reduce(function (result, key) {
-      if (predicate(source[key])) {
-        result[key] = source[key]
-      }
-
-      return result
-    }, {})
-  }
+  const filter = (p, o) =>
+    keys(o).reduce((r, k) => p(get(k, o)) ? set(k, get(k, o), r) : r, {})
 
   /**
    *
    * @function module:fun-object.filterKeys
    *
-   * @param {Function} predicate - to determine key membership
-   * @param {Object} source - to get values from
+   * @param {Function} p - x -> bool
+   * @param {Object} o - object to get values from
    *
    * @return {Object} of values whos keys passed predicate
    */
-  function filterKeys (predicate, source) {
-    return Object.keys(source).reduce(function (result, key) {
-      if (predicate(key)) {
-        result[key] = source[key]
-      }
-
-      return result
-    }, {})
-  }
+  const filterKeys = (p, o) =>
+    keys(o).reduce((r, k) => p(k) ? set(k, get(k, o), r) : r, {})
 
   /**
    *
    * @function module:fun-object.apKeys
    *
-   * @param {Object} functions - to apply
-   * @param {Object} source - to get values from
+   * @param {Object} fs - functions to apply
+   * @param {Object} o - object to get values from
    *
    * @return {Object} of newly keyed values
    */
-  function apKeys (functions, source) {
-    return Object.keys(functions)
-      .concat(Object.keys(source))
-      .reduce(function (result, key) {
-        result[(functions[key] || id)(key)] = source[key]
-
-        return result
-      }, {})
-  }
+  const apKeys = (fs, o) => [...keys(fs), ...keys(o)]
+    .reduce((r, k) => set((get(k, fs) || id)(k), get(k, o), r), {})
 
   /**
    *
    * @function module:fun-object.ap
    *
-   * @param {Object} functions - to apply
-   * @param {Object} source - to get value from
+   * @param {Object} fs - functions to apply
+   * @param {Object} o - object to get value from
    *
    * @return {*} value at key
    */
-  function ap (functions, source) {
-    return Object.keys(functions)
-      .concat(Object.keys(source))
-      .reduce(function (result, key) {
-        result[key] = (functions[key] || id)(source[key])
-
-        return result
-      }, {})
-  }
+  const ap = (fs, o) => [...keys(fs), ...keys(o)]
+    .reduce((r, k) => set(k, (get(k, fs) || id)(get(k, o)), r), {})
 
   /**
    *
    * @function module:fun-object.map
    *
-   * @param {Function} f - * -> *
-   * @param {Object} source - to get value from
+   * @param {Function} f - x -> y
+   * @param {Object} o - object to get value from
    *
    * @return {*} value at key
    */
-  function map (f, source) {
-    return Object.keys(source).reduce(function (result, key) {
-      result[key] = f(source[key])
-
-      return result
-    }, {})
-  }
+  const map = (f, o) => keys(o).reduce((r, k) => set(k, f(get(k, o)), r), {})
 
   /**
    *
    * @function module:fun-object.mapKeys
    *
    * @param {Function} f - String -> String
-   * @param {Object} source - to get value from
+   * @param {Object} o - object to get value from
    *
    * @return {*} value at key
    */
-  function mapKeys (f, source) {
-    return Object.keys(source).reduce(function (result, key) {
-      result[f(key)] = source[key]
-
-      return result
-    }, {})
-  }
+  const mapKeys = (f, o) =>
+    keys(o).reduce((r, k) => set(f(k), get(k, o), r), {})
 
   /**
    *
    * @function module:fun-object.get
    *
    * @param {String} key - indexing value
-   * @param {Object} source - to get value from
+   * @param {Object} o - object to get value from
    *
    * @return {*} value at key
    */
-  function get (key, source) {
-    return source[key]
-  }
+  const get = (key, o) => o[key]
 
   /**
    *
@@ -240,19 +163,16 @@
    *
    * @param {String} key - indexing value
    * @param {*} value - to set
-   * @param {Object} source - to set value on
+   * @param {Object} o - object to set value on
    *
    * @return {Object} copy of source object containing value at key
    */
-  function set (key, value, source) {
-    return Object.keys(source)
-      .concat([key])
-      .reduce(function (result, k) {
-        result[k] = k === key ? value : source[k]
+  const set = (key, value, o) => [...keys(o), key]
+    .reduce((r, k) => {
+      r[k] = (k === key ? value : get(k, o))
 
-        return result
-      }, {})
-  }
+      return r
+    }, {})
 
   /**
    *
@@ -260,19 +180,11 @@
    *
    * @param {String} key - indexing value
    * @param {Function} f - a -> b
-   * @param {Object} source - to set value on
+   * @param {Object} o - object to set value on
    *
    * @return {Object} copy of source object with source[key] = f(source[key])
    */
-  function update (key, f, source) {
-    return Object.keys(source)
-      .concat([key])
-      .reduce(function (result, k) {
-        result[k] = k === key ? f(source[k]) : source[k]
-
-        return result
-      }, {})
-  }
+  const update = (key, f, o) => set(key, f(get(key, o)), o)
 
   /**
    *
@@ -283,13 +195,7 @@
    *
    * @return {Object} a new object with all keys from o1 and o2, prefering o2
    */
-  function defaults (o1, o2) {
-    return concat(preferSecond, o1, o2)
-
-    function preferSecond (a, b) {
-      return b !== undefined ? b : a
-    }
-  }
+  const defaults = (o1, o2) => concat((a, b) => b !== undefined ? b : a, o1, o2)
 
   /**
    *
@@ -300,13 +206,7 @@
    *
    * @return {Object} a new object with all keys from o1 and o2, prefering o1
    */
-  function merge (o1, o2) {
-    return concat(preferFirst, o1, o2)
-
-    function preferFirst (a, b) {
-      return a !== undefined ? a : b
-    }
-  }
+  const merge = (o1, o2) => defaults(o2, o1)
 
   /**
    *
@@ -318,15 +218,8 @@
    *
    * @return {Object} result object
    */
-  function concat (valueConcat, o1, o2) {
-    return Object.keys(o1)
-      .concat(Object.keys(o2))
-      .reduce(function (result, key) {
-        result[key] = valueConcat(o1[key], o2[key])
-
-        return result
-      }, {})
-  }
+  const concat = (valueConcat, o1, o2) => [...keys(o1), ...keys(o2)]
+    .reduce((r, k) => set(k, valueConcat(get(k, o1), get(k, o2)), r), {})
 
   /**
    *
@@ -334,9 +227,7 @@
    *
    * @return {Object} {}
    */
-  function empty () {
-    return {}
-  }
+  const empty = () => ({})
 
   /**
    *
@@ -346,13 +237,17 @@
    *
    * @return {Object} { k1: v1, k2: v2, ... }
    */
-  function ofPairs (pairs) {
-    return pairs.reduce(function (result, pair) {
-      result[pair[0]] = pair[1]
+  const ofPairs = pairs => pairs.reduce((r, [k, v]) => set(k, v, r), {})
 
-      return result
-    }, {})
-  }
+  /**
+   *
+   * @function module:fun-object.ofPairs
+   *
+   * @param {Object} o - source object to get key value pairs from
+   *
+   * @return {Array<Array>} [[k1, v1], [k2, v2], ... ]
+   */
+  const toPairs = o => keys(o).map(k => [k, get(k, o)])
 
   /**
    *
@@ -363,47 +258,61 @@
    *
    * @return {Object} { key: value }
    */
-  function of (key, value) {
-    var result = {}
-    result[key] = value
-
-    return result
-  }
+  const of = (key, value) => ({ [key]: value })
 
   /**
    *
    * @function module:fun-object.values
    *
-   * @param {Object} object - to get values from
+   * @param {Object} o - object to get values from
    *
    * @return {Array} of enumerable values
    */
-  function values (object) {
-    return Object.keys(object).map(function (key) {
-      return object[key]
-    })
-  }
+  const values = o => keys(o).map(k => get(k, o))
 
   /**
    *
    * @function module:fun-object.keys
    *
-   * @param {Object} object - to get keys from
+   * @param {Object} o - object to get keys from
    *
    * @return {Array} of enumerable keys
    */
-  function keys (object) {
-    return Object.keys(object)
-  }
+  const keys = Object.keys
 
-  function id (x) {
-    return x
-  }
+  const api = { keep, drop, keys, values, reKey, of, ofPairs, empty, concat,
+    defaults, merge, map, mapKeys, ap, apKeys, get, set, update, filterKeys,
+    filter, transition, zipWith, toPairs }
 
-  function K (x) {
-    return function K () {
-      return x
-    }
-  }
+  const guards = map(inputs, {
+    keep: tuple([arrayOf(string), object]),
+    drop: tuple([arrayOf(string), object]),
+    keys: tuple([object]),
+    values: tuple([object]),
+    reKey: tuple([objectOf(string), object]),
+    of: tuple([string, any]),
+    ofPairs: tuple([arrayOf(tuple([string, any]))]),
+    concat: tuple([fun, object, object]),
+    defaults: tuple([object, object]),
+    merge: tuple([object, object]),
+    map: tuple([fun, object]),
+    mapKeys: tuple([fun, object]),
+    ap: tuple([objectOf(fun), object]),
+    apKeys: tuple([objectOf(fun), object]),
+    get: tuple([string, object]),
+    set: tuple([string, any, object]),
+    update: tuple([string, fun, object]),
+    filterKeys: tuple([fun, object]),
+    filter: tuple([fun, object]),
+    transition: tuple([
+      record({ inputs: arrayOf(string), f: fun, output: string }),
+      object
+    ]),
+    zipWith: tuple([fun, object, object]),
+    toPairs: tuple([object])
+  })
+
+  /* exports */
+  module.exports = map(curry, ap(guards, api))
 })()
 
