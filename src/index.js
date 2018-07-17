@@ -241,7 +241,7 @@
 
   /**
    *
-   * @function module:fun-object.ofPairs
+   * @function module:fun-object.toPairs
    *
    * @param {Object} o - source object to get key value pairs from
    *
